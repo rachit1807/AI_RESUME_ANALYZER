@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Resume Analyzer</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="background">
+
+<div class="main-card">
+
+    <div class="logo">
+
+        <i class="fa-solid fa-file-shield"></i>
+
+    </div>
+
+    <h1>AI Resume Analyzer</h1>
+
+    <p class="subtitle">
+
+        Analyze your resume, calculate ATS Score,
+        compare it with a Job Description and
+        discover missing skills instantly.
+
+    </p>
+
+    <form action="/upload"
+          method="POST"
+          enctype="multipart/form-data">
+
+        <div class="input-box">
+
+            <label>
+
+                <i class="fa-solid fa-file-pdf"></i>
+
+                Upload Resume (PDF)
+
+            </label>
+
+            <input
+                type="file"
+                name="resume"
+                accept=".pdf"
+                required>
+
+        </div>
+
+        <div class="input-box">
+
+            <label>
+
+                <i class="fa-solid fa-briefcase"></i>
+
+                Job Description
+
+            </label>
+
+            <textarea
+                name="job_description"
+                rows="10"
+                placeholder="Paste the complete Job Description here..."
+                required></textarea>
+
+        </div>
+
+        <button type="submit">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            Analyze Resume
+
+        </button>
+
+    </form>
+
+</div>
+
+<div class="features">
+
+    <div class="feature-card">
+
+        <i class="fa-solid fa-chart-line"></i>
+
+        <h3>ATS Score</h3>
+
+        <p>Instant ATS compatibility analysis.</p>
+
+    </div>
+
+    <div class="feature-card">
+
+        <i class="fa-solid fa-briefcase"></i>
+
+        <h3>Job Matching</h3>
+
+        <p>Match resume with job descriptions using AI.</p>
+
+    </div>
+
+    <div class="feature-card">
+
+        <i class="fa-solid fa-lightbulb"></i>
+
+        <h3>Skill Gap</h3>
+
+        <p>Identify missing skills for your dream role.</p>
+
+    </div>
+
+    <div class="feature-card">
+
+        <i class="fa-solid fa-robot"></i>
+
+        <h3>AI Suggestions</h3>
+
+        <p>Get intelligent recommendations to improve your resume.</p>
+
+    </div>
+
+</div>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>AI Resume Dashboard</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="container dashboard">
+
+
+<h1>🤖 Resume Analysis Dashboard</h1>
+
+<p>Your resume has been analyzed successfully.</p>
+
+
+
+<div class="card">
+
+<h2>ATS Score</h2>
+
+<div class="score-circle">
+
+{{ ats_score }}%
+
+</div>
+
+</div>
+
+
+
+
+
+<div class="section">
+
+<h2>🎯 Top Eligible Jobs</h2>
+
+
+{% for job in jobs %}
+
+
+<div class="job-card">
+
+
+<div class="job-header">
+
+<span>{{ job.job }}</span>
+
+<span>{{ job.score }}%</span>
+
+</div>
+
+
+<div class="progress">
+
+<div class="progress-bar" data-score="{{ job.score }}"></div>
+
+</div>
+
+
+</div>
+
+
+{% endfor %}
+
+
+</div>
+
+
+
+
+
+
+
+<div class="section">
+
+
+<h2>💻 Skills Found</h2>
+
+
+<div class="skills-container">
+
+
+{% for skill in skills %}
+
+
+<span class="skill-badge">
+
+{{ skill }}
+
+</span>
+
+
+{% endfor %}
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="section">
+
+
+<h2>⚠️ Missing Skills & Recommendations</h2>
+
+
+{% if missing_skills %}
+
+
+{% for item in missing_skills %}
+
+
+<div class="job-card">
+
+
+<h3>
+❌ {{ item.skill }}
+</h3>
+
+
+<p>
+
+<strong>Why needed:</strong><br>
+
+{{ item.why }}
+
+</p>
+
+
+<p>
+
+<strong>How to improve:</strong><br>
+
+{{ item.learn }}
+
+</p>
+
+
+</div>
+
+
+{% endfor %}
+
+
+{% else %}
+
+
+<div class="skill-badge">
+
+No Missing Skills 🎉
+
+</div>
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="section">
+
+
+<h2>🤖 Resume Improvement Suggestions</h2>
+
+
+<ul class="suggestions">
+
+
+<li>Keep your resume aligned with targeted job roles.</li>
+
+<li>Add measurable achievements in projects.</li>
+
+<li>Include relevant certifications and practical experience.</li>
+
+<li>Update technical skills according to industry requirements.</li>
+
+
+</ul>
+
+
+</div>
+
+
+
+
+
+
+<a href="/" class="home-btn">
+
+Analyze Another Resume
+
+</a>
+
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+document.querySelectorAll(".progress-bar").forEach(function(bar){
+
+
+let score = bar.getAttribute("data-score");
+
+
+bar.style.width = score + "%";
+
+
+});
+
+
+</script>
+
+
+
+</body>
+
+</html>
