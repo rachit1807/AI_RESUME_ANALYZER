@@ -1,13 +1,11 @@
 import psycopg2
 
+  import os
+import psycopg2
 
 def get_connection():
     return psycopg2.connect(
-        host="localhost",
-        database="ai_resume_analyzer",
-        user="postgres",
-        password="Rachit2509",
-        port="5432"
+        os.environ.get("DATABASE_URL")
     )
 
 
