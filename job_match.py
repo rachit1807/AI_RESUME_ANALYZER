@@ -66,10 +66,12 @@ def calculate_skill_score(resume_text, job_description):
 
 
 
-def match_jobs(resume_text):
+def match_jobs(resume_text, job_description=None):
 
-
-    jobs = get_jobs()
+    if job_description and job_description.strip():
+        jobs = [("Your Job Description", job_description.strip())]
+    else:
+        jobs = get_jobs()
 
 
     if not jobs:

@@ -188,13 +188,9 @@ No Missing Skills 🎉
 <ul class="suggestions">
 
 
-<li>Keep your resume aligned with targeted job roles.</li>
-
-<li>Add measurable achievements in projects.</li>
-
-<li>Include relevant certifications and practical experience.</li>
-
-<li>Update technical skills according to industry requirements.</li>
+{% for suggestion in suggestions %}
+<li>{{ suggestion }}</li>
+{% endfor %}
 
 
 </ul>

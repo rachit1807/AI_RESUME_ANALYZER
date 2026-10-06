@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-import os
 
 from resume_parser import extract_text
 from ats_score import calculate_ats_score
@@ -12,11 +11,7 @@ from resume_suggestions import generate_resume_suggestions
 app = Flask(__name__)
 
 
-UPLOAD_FOLDER = "uploads"
-
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 
 
 @app.route("/")
@@ -30,26 +25,18 @@ def home():
 def upload_resume():
 
 
-    file = request.files["resume"]
+    file = request.files.get("resume")
+    if not file or not file.filename:
+        return "Please choose a resume PDF.", 400
+    if not file.filename.lower().endswith(".pdf"):
+        return "Please upload a PDF file.", 400
 
-
-    if not file:
-
-        return "No file uploaded"
-
-
-
-    filepath = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        file.filename
-    )
-
-
-    file.save(filepath)
-
-
-
-    resume_text = extract_text(filepath)
+    try:
+        resume_text = extract_text(file.read())
+    except Exception:
+        return "We couldn’t read that PDF. Please try another file.", 400
+    if not resume_text.strip():
+        return "No selectable text was found in this PDF. Please upload a text-based PDF.", 400
 
 
 
@@ -59,9 +46,8 @@ def upload_resume():
 
 
 
-    jobs = match_jobs(
-        resume_text
-    )
+    job_description = request.form.get("job_description", "").strip()
+    jobs = match_jobs(resume_text, job_description)
 
 
 
@@ -69,10 +55,7 @@ def upload_resume():
 
         top_job = jobs[0]["job"]
 
-        missing_skills = find_missing_skills(
-            resume_text,
-            top_job
-        )
+        missing_skills = find_missing_skills(resume_text, top_job, job_description or None)
 
 
     else:
@@ -90,10 +73,11 @@ def upload_resume():
 
 
 
-    save_resume(
-        file.filename,
-        ats_score
-    )
+    try:
+        save_resume(file.filename, ats_score)
+    except Exception:
+        # Analysis remains available when optional database logging is not configured.
+        app.logger.exception("Resume analysis logging failed")
 
 
 
@@ -107,7 +91,12 @@ def upload_resume():
     )
 
 
+@app.errorhandler(413)
+def request_entity_too_large(_error):
+    return "PDF must be 10 MB or smaller.", 413
+
+
 
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run()

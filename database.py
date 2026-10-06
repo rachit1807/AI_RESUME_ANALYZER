@@ -3,14 +3,17 @@ import psycopg2
 
 
 def get_connection():
-    return psycopg2.connect(
-        os.environ.get("DATABASE_URL")
-    )
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        return None
+    return psycopg2.connect(database_url)
 
 
 def save_resume(filename, ats_score):
 
     conn = get_connection()
+    if conn is None:
+        return
 
     cursor = conn.cursor()
 
@@ -31,6 +34,8 @@ def save_resume(filename, ats_score):
 def get_jobs():
 
     conn = get_connection()
+    if conn is None:
+        return []
 
     cursor = conn.cursor()
 
