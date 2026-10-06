@@ -1,53 +1,103 @@
 # AI Resume Analyzer
 
-A resume analysis web app that evaluates PDF resumes, calculates a heuristic ATS score, compares a resume with a pasted job description, identifies keyword skill gaps, and provides improvement suggestions. Matching uses TF-IDF and keyword overlap; it does not call a hosted generative AI service.
+Analyze a text-based PDF resume against a job description. The app calculates a heuristic ATS-style score, finds supported skills, compares resume and role keywords, highlights selected skill gaps, and offers practical suggestions.
 
-## Features
+> **Live app:** [ai-resume-analyzer-rachit.onrender.com](https://ai-resume-analyzer-rachit.onrender.com/)
 
-✅ Resume PDF Analysis  
-✅ ATS Score Calculation  
-✅ Skill Extraction  
-✅ Job Description Matching
-✅ Skill Gap Detection  
-✅ Resume Improvement Suggestions  
+## What it does
 
-## Tech Stack
+- Accepts PDF resumes up to 10 MB.
+- Extracts selectable text from the PDF in memory.
+- Calculates an ATS-style score from contact details, education, resume sections, and a built-in technical skills list.
+- Compares resume text with a pasted job description using TF-IDF similarity and keyword overlap.
+- Lists detected skills and selected missing skills from the role description, with learning guidance.
+- Produces rule-based resume improvement suggestions.
+- Works without a database or paid AI API key.
 
-- Python
-- Flask
-- PostgreSQL
-- HTML/CSS
-- Natural Language Processing (NLP)
-- Scikit-learn
-- TF-IDF & Cosine Similarity
+## How the analysis works
+
+The project uses scikit-learn's TF-IDF vectorizer and cosine similarity for text matching, plus hand-written rules for ATS scoring, skill detection, and feedback. It does **not** call a hosted generative AI model, and its score is an informational heuristic—not a hiring decision or a guarantee of ATS results.
+
+For the most useful comparison, paste the target role's job description along with the resume. The current skill-gap catalogue covers a defined set of common technical skills, so it may not identify every requirement in a role.
+
+## Privacy and file handling
+
+Resume PDFs are read and analyzed in memory; the app does not save the uploaded PDF to disk. If a `DATABASE_URL` is configured, the optional logging code records the uploaded filename and ATS score in the `resumes` table. Without that variable, analysis works without database logging. Avoid uploading documents you do not have permission to process.
+
+## Technology
+
+- Python and Flask
+- pdfplumber for PDF text extraction
+- scikit-learn for TF-IDF and cosine similarity
+- PostgreSQL support for optional score logging and stored job listings
+- Jinja templates and CSS
+- Gunicorn for production serving
 
 ## Run locally
 
-```bash
-python -m pip install -r requirements.txt
-python app.py
-```
+1. Clone the repository and open its folder:
 
-Open `http://127.0.0.1:5000` and upload a text-based PDF (up to 10 MB).
+   ```bash
+   git clone https://github.com/rachit1807/AI_RESUME_ANALYZER.git
+   cd AI_RESUME_ANALYZER
+   ```
+
+2. Create and activate a virtual environment (recommended):
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate       # macOS / Linux
+   # .venv\Scripts\activate       # Windows PowerShell
+   ```
+
+3. Install dependencies and start Flask:
+
+   ```bash
+   python -m pip install -r requirements.txt
+   python app.py
+   ```
+
+4. Open [http://127.0.0.1:5000](http://127.0.0.1:5000), choose a text-based PDF, paste a job description, and select **Analyze Resume**.
 
 ## Deploy on Render
 
-Create a Render **Web Service** from this repository with:
+The live site is deployed as a Render Web Service connected to the `main` branch of this repository. To create another deployment, create a Web Service from the repository and use:
 
-- Build command: `pip install -r requirements.txt`
-- Start command: `gunicorn app:app`
-- Instance type: Free
+| Setting | Value |
+| --- | --- |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `gunicorn app:app` |
+| Instance | Free |
 
-The app works without a database. If `DATABASE_URL` is configured, it can also read job listings from the `jobs` table and log scores to the `resumes` table. Uploaded PDF content is processed in memory and is not saved to disk.
+No environment variables or database are required for the core analyzer. Render's free service can spin down when idle, so its first request after inactivity may take around a minute to respond.
 
-Render's free web services can spin down when idle, so the first request after inactivity may take longer.
+## Project layout
 
-## How It Works
+```text
+.
+├── app.py                    # Flask routes and upload handling
+├── ats_score.py              # ATS-style heuristic score and skill extraction
+├── job_match.py              # TF-IDF and keyword-based job matching
+├── skill_gap.py              # Skill gap detection and learning guidance
+├── resume_parser.py          # PDF text extraction
+├── resume_suggestions.py     # Rule-based improvement suggestions
+├── database.py               # Optional PostgreSQL access
+├── database.sql              # Database setup placeholder
+├── templates/
+│   ├── index.html             # Upload form
+│   └── result.html            # Analysis results
+├── static/style.css           # App styles
+├── requirements.txt           # Python dependencies
+└── Procfile                   # Production start command
+```
 
-1. Upload Resume PDF
-2. Extract resume information using NLP
-3. Compare skills with job requirements
-4. Generate ATS compatibility score
-5. Suggest missing skills and improvements
+## Known limitations
 
-## Project Structure
+- Scanned PDFs without selectable text are not OCR processed.
+- ATS scores and feedback are rule-based approximations; review the resume yourself before relying on them.
+- Job and skill matching depends on text overlap and the built-in skill vocabulary.
+- The current web service has no user accounts or saved analysis history.
+
+## License
+
+No license file is currently included. Contact the repository owner before redistributing or reusing this project.
