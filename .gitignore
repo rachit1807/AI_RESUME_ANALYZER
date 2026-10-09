@@ -1,5 +1,13 @@
 venv/
+.venv*/
+instance/
+.pytest_cache/
+htmlcov/
+coverage.xml
 __pycache__/
 *.pyc
 .env
+!.env.example
 uploads/
+
+.DS_Store

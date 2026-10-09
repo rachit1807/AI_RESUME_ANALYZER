@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Resume analysis, skills development, and recruitment tools.">
+  <title>{% block title %}Career Studio{% endblock %} · Career Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">C</span> Career<span>Studio</span></a>
+    <nav aria-label="Main navigation" class="nav-links">
+      <a href="{{ url_for('home') }}">Analyze</a><a href="{{ url_for('candidate.jobs') }}">Jobs</a>
+      {% if g.user and g.user.role == 'candidate' %}<a href="{{ url_for('candidate.dashboard') }}">My dashboard</a><a href="{{ url_for('candidate.builder') }}">Resume builder</a>{% endif %}
+      {% if g.user and g.user.role == 'recruiter' %}<a href="{{ url_for('recruiter.jobs_dashboard') }}">Company portal</a><a href="{{ url_for('recruiter.rank_resumes') }}">Rank resumes</a>{% endif %}
+      {% if g.user and g.user.role == 'admin' %}<a href="{{ url_for('admin.dashboard') }}">Admin</a>{% endif %}
+      {% if g.user %}<a href="{{ url_for('candidate.profile') if g.user.role == 'candidate' else url_for('home') }}">{{ g.user.name }}</a>
+        <form action="{{ url_for('auth.logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-button" type="submit">Sign out</button></form>
+      {% else %}<a href="{{ url_for('auth.login') }}">Sign in</a><a class="nav-cta" href="{{ url_for('auth.register') }}">Create account</a>{% endif %}
+    </nav>
+  </header>
+  <main class="page-shell">
+    {% if storage_temporary %}<div class="flash warning" role="status">Temporary storage is active on this deployment. Account, resume, and application data may be lost when the service restarts. Configure PostgreSQL to enable durable production accounts.</div>{% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack" role="status">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer"><span>Career Studio</span><span>Private by design · Heuristic scores are informational only</span></footer>
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
