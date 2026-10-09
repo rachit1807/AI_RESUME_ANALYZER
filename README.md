@@ -8,6 +8,8 @@ A Flask career platform for resume analysis, candidate career tools, recruiter j
 
 ## Features
 
+- Switch between light and dark themes across the application. Your choice is saved in this browser and follows you between pages.
+
 ### Resume analysis
 
 - Upload a text-based PDF (10 MB maximum); PDF bytes are parsed in memory and discarded after the request.

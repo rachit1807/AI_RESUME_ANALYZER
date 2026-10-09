@@ -1,4 +1,25 @@
 (() => {
+  const themeToggle = document.querySelector("[data-theme-toggle]");
+  if (themeToggle) {
+    const themeIcon = themeToggle.querySelector("[data-theme-icon]");
+    const themeLabel = themeToggle.querySelector(".theme-toggle-label");
+    const syncThemeControl = () => {
+      const isDark = document.documentElement.dataset.theme === "dark";
+      themeToggle.setAttribute("aria-label", `Switch to ${isDark ? "light" : "dark"} theme`);
+      themeToggle.setAttribute("title", `Switch to ${isDark ? "light" : "dark"} theme`);
+      themeToggle.setAttribute("aria-pressed", String(isDark));
+      if (themeIcon) themeIcon.textContent = isDark ? "☀" : "☾";
+      if (themeLabel) themeLabel.textContent = isDark ? "Light" : "Dark";
+    };
+    syncThemeControl();
+    themeToggle.addEventListener("click", () => {
+      const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = nextTheme;
+      try { localStorage.setItem("career-platform-theme", nextTheme); } catch {}
+      syncThemeControl();
+    });
+  }
+
   const roleSelect = document.getElementById("role-select");
   const companyField = document.getElementById("company-field");
   if (roleSelect && companyField) {
