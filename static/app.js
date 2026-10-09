@@ -16,6 +16,7 @@
       const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
       document.documentElement.dataset.theme = nextTheme;
       try { localStorage.setItem("career-platform-theme", nextTheme); } catch {}
+      try { document.cookie = `career-platform-theme=${nextTheme}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; } catch {}
       syncThemeControl();
     });
   }
