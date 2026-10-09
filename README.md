@@ -1,4 +1,4 @@
-# AI Resume Analyzer & Smart Job Matching Platform
+# AI Resume Analyzer & Career Development Platform
 
 **Live analyzer:** [ai-resume-analyzer-rachit.onrender.com](https://ai-resume-analyzer-rachit.onrender.com/)
 
