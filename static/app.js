@@ -11,13 +11,20 @@
       if (themeIcon) themeIcon.textContent = isDark ? "☀" : "☾";
       if (themeLabel) themeLabel.textContent = isDark ? "Light" : "Dark";
     };
+    const applyTheme = (theme) => {
+      if (theme !== "dark" && theme !== "light") return;
+      document.documentElement.dataset.theme = theme;
+      syncThemeControl();
+    };
     syncThemeControl();
     themeToggle.addEventListener("click", () => {
       const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-      document.documentElement.dataset.theme = nextTheme;
       try { localStorage.setItem("career-platform-theme", nextTheme); } catch {}
       try { document.cookie = `career-platform-theme=${nextTheme}; Path=/; Max-Age=31536000; SameSite=Lax${location.protocol === "https:" ? "; Secure" : ""}`; } catch {}
-      syncThemeControl();
+      applyTheme(nextTheme);
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.key === "career-platform-theme") applyTheme(event.newValue);
     });
   }
 
