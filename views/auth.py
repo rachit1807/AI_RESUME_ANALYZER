@@ -49,13 +49,22 @@ def login_required(*roles):
 
 @auth.route("/register", methods=["GET", "POST"])
 def register():
+    return _register_for_role()
+
+
+@auth.route("/recruiter/register", methods=["GET", "POST"])
+def recruiter_register():
+    return _register_for_role("recruiter")
+
+
+def _register_for_role(expected_role=None):
     if g.user:
         return redirect(role_home(g.user))
     if request.method == "POST":
         name = request.form.get("name", "").strip()[:120]
         email = request.form.get("email", "").strip().lower()[:254]
         password = request.form.get("password", "")
-        role = request.form.get("role", "candidate")
+        role = expected_role or request.form.get("role", "candidate")
         company_name = request.form.get("company", "").strip()[:180]
         if not name or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
             flash("Enter your name and a valid email address.", "error")
@@ -83,7 +92,7 @@ def register():
             except IntegrityError:
                 db.session.rollback()
                 flash("An account with that email already exists.", "error")
-    return render_template("register.html")
+    return render_template("register.html", portal=expected_role)
 
 
 def _safe_portal_next(target, role):
