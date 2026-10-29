@@ -24,7 +24,10 @@ class RoleAwareSessionInterface(SecureCookieSessionInterface):
     def get_cookie_name(self, app):
         if request.path == "/admin" or request.path.startswith("/admin/"):
             return app.config["ADMIN_SESSION_COOKIE_NAME"]
-        if request.path == "/recruiter" or request.path.startswith("/recruiter/"):
+        if request.path == "/recruiter" or request.path.startswith("/recruiter/") or (
+            request.path == "/register"
+            and (request.args.get("portal") == "recruiter" or request.form.get("role") == "recruiter")
+        ):
             return app.config["RECRUITER_SESSION_COOKIE_NAME"]
         return super().get_cookie_name(app)
 
