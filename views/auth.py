@@ -33,7 +33,13 @@ def login_required(*roles):
         def wrapped(*args, **kwargs):
             if not g.user:
                 flash("Please sign in to continue.", "warning")
-                return redirect(url_for("auth.login", next=request.path))
+                if request.path == "/admin" or request.path.startswith("/admin/"):
+                    endpoint = "auth.admin_login"
+                elif request.path == "/recruiter" or request.path.startswith("/recruiter/"):
+                    endpoint = "auth.recruiter_login"
+                else:
+                    endpoint = "auth.login"
+                return redirect(url_for(endpoint, next=request.path))
             if roles and g.user.role not in roles:
                 return render_template("error.html", message="You do not have access to this page."), 403
             return view(*args, **kwargs)
@@ -43,13 +49,22 @@ def login_required(*roles):
 
 @auth.route("/register", methods=["GET", "POST"])
 def register():
+    return _register_for_role()
+
+
+@auth.route("/recruiter/register", methods=["GET", "POST"])
+def recruiter_register():
+    return _register_for_role("recruiter")
+
+
+def _register_for_role(expected_role=None):
     if g.user:
         return redirect(role_home(g.user))
     if request.method == "POST":
         name = request.form.get("name", "").strip()[:120]
         email = request.form.get("email", "").strip().lower()[:254]
         password = request.form.get("password", "")
-        role = request.form.get("role", "candidate")
+        role = expected_role or request.form.get("role", "candidate")
         company_name = request.form.get("company", "").strip()[:180]
         if not name or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
             flash("Enter your name and a valid email address.", "error")
@@ -77,11 +92,23 @@ def register():
             except IntegrityError:
                 db.session.rollback()
                 flash("An account with that email already exists.", "error")
-    return render_template("register.html")
+    return render_template("register.html", portal=expected_role)
 
 
-@auth.route("/login", methods=["GET", "POST"])
-def login():
+def _safe_portal_next(target, role):
+    if not target.startswith("/") or target.startswith("//"):
+        return None
+    path = target.partition("?")[0]
+    if role == "admin":
+        return target if path == "/admin" or path.startswith("/admin/") else None
+    if role == "recruiter":
+        return target if path == "/recruiter" or path.startswith("/recruiter/") else None
+    if path == "/admin" or path.startswith("/admin/") or path == "/recruiter" or path.startswith("/recruiter/"):
+        return None
+    return target
+
+
+def _portal_login(expected_role):
     if g.user:
         return redirect(role_home(g.user))
     if request.method == "POST":
@@ -89,18 +116,52 @@ def login():
         password = request.form.get("password", "")
         user = User.query.filter_by(email=email, active=True).first()
         if user and check_password_hash(user.password_hash, password):
-            session.clear()
-            session["user_id"] = user.id
-            session.permanent = True
-            db.session.add(AuditEvent(actor_id=user.id, action="auth.login", target_type="user", target_id=str(user.id)))
-            db.session.commit()
-            return redirect(request.args.get("next") if request.args.get("next", "").startswith("/") and not request.args.get("next", "").startswith("//") else role_home(user))
-        flash("Email or password was incorrect.", "error")
-    return render_template("login.html")
+            if user.role != expected_role:
+                flash(f"This is a {user.role} account. Choose its matching sign-in link below.", "error")
+            else:
+                session.clear()
+                session["user_id"] = user.id
+                session.permanent = True
+                db.session.add(AuditEvent(actor_id=user.id, action="auth.login", target_type="user", target_id=str(user.id)))
+                db.session.commit()
+                target = _safe_portal_next(request.args.get("next", ""), expected_role)
+                return redirect(target or role_home(user))
+        else:
+            flash("Email or password was incorrect.", "error")
+    return render_template("login.html", portal=expected_role)
+
+
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+    return _portal_login("candidate")
+
+
+@auth.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    return _portal_login("admin")
+
+
+@auth.route("/recruiter/login", methods=["GET", "POST"])
+def recruiter_login():
+    return _portal_login("recruiter")
+
+
+def _portal_logout():
+    session.clear()
+    flash("You have signed out.", "success")
+    return redirect(url_for("home"))
 
 
 @auth.post("/logout")
 def logout():
-    session.clear()
-    flash("You have signed out.", "success")
-    return redirect(url_for("home"))
+    return _portal_logout()
+
+
+@auth.post("/admin/logout")
+def admin_logout():
+    return _portal_logout()
+
+
+@auth.post("/recruiter/logout")
+def recruiter_logout():
+    return _portal_logout()

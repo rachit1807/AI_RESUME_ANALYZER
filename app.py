@@ -8,6 +8,7 @@ from pathlib import Path
 
 import click
 from flask import Flask, jsonify, render_template, request
+from flask.sessions import SecureCookieSessionInterface
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy.exc import SQLAlchemyError
 from werkzeug.security import generate_password_hash
@@ -15,6 +16,20 @@ from werkzeug.security import generate_password_hash
 from models import CandidateProfile, User, db
 
 csrf = CSRFProtect()
+
+
+class RoleAwareSessionInterface(SecureCookieSessionInterface):
+    """Use independent signed cookies for admin, recruiter, and candidate tabs."""
+
+    def get_cookie_name(self, app):
+        if request.path == "/admin" or request.path.startswith("/admin/"):
+            return app.config["ADMIN_SESSION_COOKIE_NAME"]
+        if request.path == "/recruiter" or request.path.startswith("/recruiter/") or (
+            request.path == "/register"
+            and (request.args.get("portal") == "recruiter" or request.form.get("role") == "recruiter")
+        ):
+            return app.config["RECRUITER_SESSION_COOKIE_NAME"]
+        return super().get_cookie_name(app)
 
 
 def create_app(test_config=None):
@@ -51,6 +66,8 @@ def create_app(test_config=None):
         SQLALCHEMY_ENGINE_OPTIONS={"pool_pre_ping": True},
         MAX_CONTENT_LENGTH=10 * 1024 * 1024,
         SESSION_COOKIE_HTTPONLY=True,
+        ADMIN_SESSION_COOKIE_NAME="admin_session",
+        RECRUITER_SESSION_COOKIE_NAME="recruiter_session",
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "true").lower() != "false",
         PERMANENT_SESSION_LIFETIME=60 * 60 * 8,
@@ -64,6 +81,7 @@ def create_app(test_config=None):
     )
     if test_config:
         app.config.update(test_config)
+    app.session_interface = RoleAwareSessionInterface()
     app.logger.setLevel(logging.INFO)
     @app.context_processor
     def inject_storage_state():
