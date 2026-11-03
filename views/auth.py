@@ -131,7 +131,7 @@ def admin_register():
         configured_token = current_app.config["ADMIN_SETUP_TOKEN"]
         if not hmac.compare_digest(setup_token, configured_token):
             flash("The admin setup key is incorrect.", "error")
-        elif not name or not re.fullmatch(r"[^\\s@]+@[^\\s@]+\\.[^\\s@]+", email):
+        elif not name or not re.fullmatch(r"[^\s@]+@[^\s@]+\.[^\s@]+", email):
             flash("Enter your name and a valid email address.", "error")
         elif len(password) < 12:
             flash("Use a password with at least 12 characters.", "error")
