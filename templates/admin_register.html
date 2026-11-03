@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Create admin account{% endblock %}
+{% block content %}
+<section class="auth-wrap">
+  <div class="auth-aside">
+    <p class="eyebrow">ADMIN SETUP</p>
+    <h1>Set up the platform administrator.</h1>
+    <p>This protected setup is available only until the first admin account is created. Keep the setup key private.</p>
+  </div>
+  <div class="panel auth-panel">
+    <h2>Create admin account</h2>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>Admin setup key<input type="password" name="setup_token" required autocomplete="off"></label>
+      <label>Full name<input name="name" required maxlength="120" autocomplete="name"></label>
+      <label>Email<input type="email" name="email" required maxlength="254" autocomplete="email"></label>
+      <label>Password <small>At least 12 characters</small><input type="password" name="password" required minlength="12" autocomplete="new-password"></label>
+      <button class="button button-primary full-width" type="submit">Create admin account →</button>
+    </form>
+    <p class="auth-switch"><a href="{{ url_for('auth.admin_login') }}">Return to admin sign in</a></p>
+  </div>
+</section>
+{% endblock %}
