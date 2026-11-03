@@ -1,7 +1,8 @@
+import hmac
 import re
 from functools import wraps
 
-from flask import Blueprint, flash, g, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, g, redirect, render_template, request, session, url_for
 from sqlalchemy.exc import IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -110,6 +111,60 @@ def _safe_portal_next(target, role):
     return target
 
 
+def _admin_setup_available():
+    return bool(current_app.config.get("ADMIN_SETUP_TOKEN")) and User.query.filter_by(role="admin").first() is None
+
+
+@auth.route("/admin/register", methods=["GET", "POST"])
+def admin_register():
+    if g.user:
+        return redirect(role_home(g.user))
+    if not _admin_setup_available():
+        flash("Admin account setup is closed. Sign in with an existing admin account.", "error")
+        return redirect(url_for("auth.admin_login"))
+
+    if request.method == "POST":
+        setup_token = request.form.get("setup_token", "")
+        name = request.form.get("name", "").strip()[:120]
+        email = request.form.get("email", "").strip().lower()[:254]
+        password = request.form.get("password", "")
+        configured_token = current_app.config["ADMIN_SETUP_TOKEN"]
+        if not hmac.compare_digest(setup_token, configured_token):
+            flash("The admin setup key is incorrect.", "error")
+        elif not name or not re.fullmatch(r"[^\\s@]+@[^\\s@]+\\.[^\\s@]+", email):
+            flash("Enter your name and a valid email address.", "error")
+        elif len(password) < 12:
+            flash("Use a password with at least 12 characters.", "error")
+        elif User.query.filter_by(role="admin").first() is not None:
+            flash("An admin account already exists. Please sign in.", "error")
+            return redirect(url_for("auth.admin_login"))
+        else:
+            user = User.query.filter_by(email=email).first()
+            if user:
+                if not check_password_hash(user.password_hash, password):
+                    flash("That email already has an account. Enter its current password to promote it to admin.", "error")
+                else:
+                    user.name = name
+                    user.role = "admin"
+                    user.active = True
+            else:
+                user = User(name=name, email=email, password_hash=generate_password_hash(password), role="admin")
+                db.session.add(user)
+            try:
+                db.session.flush()
+                db.session.add(AuditEvent(actor_id=user.id, action="admin.bootstrap_created", target_type="user", target_id=str(user.id)))
+                db.session.commit()
+                session.clear()
+                session["user_id"] = user.id
+                session.permanent = True
+                flash("Admin account created. You are signed in.", "success")
+                return redirect(role_home(user))
+            except IntegrityError:
+                db.session.rollback()
+                flash("Admin setup could not be completed. Refresh and try again.", "error")
+    return render_template("admin_register.html")
+
+
 def _portal_login(expected_role):
     if g.user:
         return redirect(role_home(g.user))
@@ -130,7 +185,7 @@ def _portal_login(expected_role):
                 return redirect(target or role_home(user))
         else:
             flash("Email or password was incorrect.", "error")
-    return render_template("login.html", portal=expected_role)
+    return render_template("login.html", portal=expected_role, admin_setup_available=_admin_setup_available())
 
 
 @auth.route("/login", methods=["GET", "POST"])
