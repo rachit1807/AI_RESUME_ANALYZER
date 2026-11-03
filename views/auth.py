@@ -84,6 +84,8 @@ def _register_for_role(expected_role=None):
                     db.session.add(Company(name=company_name, owner_id=user.id))
                 db.session.add(AuditEvent(actor_id=user.id, action="account.created", target_type="user", target_id=str(user.id)))
                 db.session.commit()
+                if role == "recruiter" and request.path == "/register":
+                    request.environ["resume_analyzer_recruiter_registration"] = True
                 session.clear()
                 session["user_id"] = user.id
                 session.permanent = True
