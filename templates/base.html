@@ -17,10 +17,10 @@
     <nav aria-label="Main navigation" class="nav-links">
       <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark theme" title="Switch to dark theme"><span data-theme-icon aria-hidden="true">☾</span><span class="theme-toggle-label">Dark</span></button>
       {% if admin_portal %}
-        {% if g.user and g.user.role == 'admin' %}<a href="{{ url_for('admin.dashboard') }}">Admin dashboard</a><a href="{{ url_for('candidate.profile') }}">{{ g.user.name }}</a><form action="{{ url_for('auth.admin_logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-button" type="submit">Sign out</button></form>
+        {% if g.user and g.user.role == 'admin' %}<a href="{{ url_for('admin.dashboard') }}">Admin dashboard</a><span class="nav-user">{{ g.user.name }}</span><form action="{{ url_for('auth.admin_logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-button" type="submit">Sign out</button></form>
         {% else %}<a href="{{ url_for('auth.admin_login') }}">Admin sign in</a>{% endif %}
       {% elif recruiter_portal %}
-        {% if g.user and g.user.role == 'recruiter' %}<a href="{{ url_for('recruiter.jobs_dashboard') }}">Company portal</a><a href="{{ url_for('recruiter.rank_resumes') }}">Rank resumes</a><a href="{{ url_for('home') }}">{{ g.user.name }}</a><form action="{{ url_for('auth.recruiter_logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-button" type="submit">Sign out</button></form>
+        {% if g.user and g.user.role == 'recruiter' %}<a href="{{ url_for('recruiter.jobs_dashboard') }}">Company portal</a><a href="{{ url_for('recruiter.rank_resumes') }}">Rank resumes</a><a href="{{ url_for('recruiter.jobs_dashboard') }}">{{ g.user.name }}</a><form action="{{ url_for('auth.recruiter_logout') }}" method="post" class="inline-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="nav-button" type="submit">Sign out</button></form>
         {% else %}<a href="{{ url_for('auth.recruiter_login') }}">Recruiter sign in</a><a class="nav-cta" href="{{ url_for('auth.recruiter_register') }}">Create company account</a>{% endif %}
       {% else %}
         <a href="{{ url_for('home') }}">Analyze</a><a href="{{ url_for('candidate.jobs') }}">Jobs</a>
