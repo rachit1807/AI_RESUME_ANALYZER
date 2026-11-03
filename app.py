@@ -61,6 +61,7 @@ def create_app(test_config=None):
                 secret_key = secret_path.read_text(encoding="utf-8").strip()
     app.config.update(
         SECRET_KEY=secret_key,
+        ADMIN_SETUP_TOKEN=os.environ.get("ADMIN_SETUP_TOKEN", ""),
         SQLALCHEMY_DATABASE_URI=database_url,
         STORAGE_PERSISTENT=bool(database_url),
         STORAGE_TEMPORARY=not bool(database_url) and bool(os.environ.get("RENDER_SERVICE_ID")),
