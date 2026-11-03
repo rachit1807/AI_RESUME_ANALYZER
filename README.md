@@ -1,6 +1,12 @@
 # AI Resume Analyzer & Career Development Platform
 
-**Live analyzer:** [ai-resume-analyzer-rachit.onrender.com](https://ai-resume-analyzer-rachit.onrender.com/)
+**Live application:** [ai-resume-analyzer-rachit.onrender.com](https://ai-resume-analyzer-rachit.onrender.com/)
+
+### Live portals
+
+- **Applicant portal:** [Create account](https://ai-resume-analyzer-rachit.onrender.com/register) · [Sign in](https://ai-resume-analyzer-rachit.onrender.com/login)
+- **Recruiter portal:** [Create company account](https://ai-resume-analyzer-rachit.onrender.com/recruiter/register) · [Sign in](https://ai-resume-analyzer-rachit.onrender.com/recruiter/login)
+- **Admin portal:** [Sign in](https://ai-resume-analyzer-rachit.onrender.com/admin/login) — admin accounts are provisioned separately by an administrator; public registration does not create admin accounts.
 
 A Flask career platform for resume analysis, candidate career tools, recruiter job management, and candidate matching. It extends the original PDF analyzer while keeping `/`, `/upload`, the legacy PostgreSQL helpers, and the existing `resumes` and `jobs` tables available.
 
