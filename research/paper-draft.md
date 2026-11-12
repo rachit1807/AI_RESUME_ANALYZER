@@ -110,21 +110,21 @@ The existing ATS-style completeness score adds fixed points for detected contact
 
 Let r be the extracted resume text and j the job description. The implementation vectorizes the pair using scikit-learn’s TfidfVectorizer with English stop words and calculates cosine similarity:
 
-$
+```math
 s_{\mathrm{tfidf}}(r,j)=100\times\cos\left(\mathrm{TFIDF}(r),\mathrm{TFIDF}(j)\right)
-$
+```
 
 Let K be the finite skill catalogue, K_j the catalogue skills found in the job text, and K_r the catalogue skills found in the resume text. The matched and missing skills are:
 
-$
+```math
 M=K_j\cap K_r,\qquad G=K_j\setminus K_r
-$
+```
 
 When K_j is non-empty, the implemented match score is:
 
-$
+```math
 s_{\mathrm{match}}=\operatorname{round}\left(0.4s_{\mathrm{tfidf}}+0.6\times100\frac{|M|}{|K_j|}\right),
-$
+```
 
 capped at 100. If the job text contains no catalogue skill, the current code uses the TF–IDF similarity as the score. The output is accompanied by detected skills and missing-skill guidance.
 
@@ -139,6 +139,7 @@ The Flask application includes candidate resume analysis and career tools, recru
 ### 🗂️ 4.1 Data
 
 Create a benchmark of approximately 60 resume–job pairs using either:
+
 - fully fictional synthetic resumes and job descriptions, or
 - documents collected with explicit informed consent and personal identifiers removed.
 
@@ -163,6 +164,7 @@ Keep preprocessing, inputs, and tie handling consistent. Save the code revision 
 ### 📊 4.4 Metrics
 
 Report:
+
 - Spearman rank correlation between system scores and aggregate human relevance ratings;
 - nDCG@5 or another predeclared ranking metric, using the rating scale as graded relevance;
 - Precision@5 only if a relevance threshold is defined before analysis;
